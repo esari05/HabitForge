@@ -13,13 +13,13 @@ function XPRing({ level, currentXP, nextLevelXP, progress }) {
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           <defs>
             <linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#7C6CF8" />
-              <stop offset="100%" stopColor="#B06AF5" />
+              <stop offset="0%" stopColor="#FFC247" />
+              <stop offset="100%" stopColor="#FF3D5A" />
             </linearGradient>
           </defs>
           {/* Track */}
           <circle cx={R} cy={R} r={r} fill="none"
-            stroke="rgba(124,108,248,0.12)" strokeWidth={stroke} />
+            stroke="rgba(255,194,71,0.12)" strokeWidth={stroke} />
           {/* Progress */}
           <circle cx={R} cy={R} r={r} fill="none"
             stroke="url(#xpGrad)" strokeWidth={stroke}
@@ -56,7 +56,7 @@ function WeekDot({ day }) {
   return (
     <div className="week-day">
       <div className={`week-dot ${cls}`}
-        style={isToday ? { boxShadow: '0 0 0 2px var(--primary)' } : {}}>
+        style={isToday ? { boxShadow: '0 0 0 2px var(--gold)' } : {}}>
         {content}
       </div>
       <span className="week-dot-label">{day.dayName}</span>

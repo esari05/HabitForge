@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { quotes } from '../data/quotes.js'
-import { getDailyQuote, formatDate, getGreeting, calculateStreak } from '../utils/helpers.js'
+import { getDailyQuote, formatDate, calculateStreak } from '../utils/helpers.js'
 
-export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, history }) {
-  const [notifAsked, setNotifAsked] = useState(() => localStorage.getItem('hf_notif_asked') === '1')
-  const [notifGranted, setNotifGranted] = useState(() => Notification?.permission === 'granted')
+export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, history, profile }) {
   const [justChecked, setJustChecked] = useState(null)
 
   const quote = getDailyQuote(quotes)
@@ -23,25 +21,10 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
     }
   }
 
-  const requestNotif = async () => {
-    if (!('Notification' in window)) return
-    const perm = await Notification.requestPermission()
-    setNotifGranted(perm === 'granted')
-    setNotifAsked(true)
-    localStorage.setItem('hf_notif_asked', '1')
-    if (perm === 'granted') {
-      new Notification('HabitForge 🔥', {
-        body: 'Erinnerungen aktiviert! Bleib dran.',
-        icon: '/icon-192.png'
-      })
-    }
-  }
-
   return (
     <div className="screen">
-      {/* Header */}
       <div className="today-header">
-        <div className="today-greeting">{getGreeting()} ⚡</div>
+        <div className="today-greeting">Yosh, {profile.name}!</div>
         <div className="today-date">{formatDate()}</div>
         <div className="today-pills">
           {streak > 0 && <span className="pill pill-fire">🔥 {streak} {streak === 1 ? 'Tag' : 'Tage'}</span>}
@@ -49,34 +32,24 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
         </div>
       </div>
 
-      {/* Notification nudge */}
-      {!notifAsked && !notifGranted && 'Notification' in window && (
-        <div className="notif-bar">
-          <span className="notif-text">🔔 Tägliche Erinnerungen aktivieren?</span>
-          <button className="notif-btn" onClick={requestNotif}>Aktivieren</button>
-        </div>
-      )}
-
-      {/* Quote */}
-      <div className="quote-wrap" style={{ marginTop: notifAsked ? 16 : 12 }}>
+      <div className="quote-wrap">
         <div className="quote-card">
           <p className="quote-text">{quote.text}</p>
           <p className="quote-author">— {quote.author}</p>
         </div>
       </div>
 
-      {/* Goals */}
       <div className="goals-wrap">
-        <div className="section-head" style={{ marginBottom: 12 }}>
-          <span className="section-title">Heutige Ziele</span>
-          <span className="pill pill-xp" style={{ fontSize: 11 }}>{completed} / {total}</span>
+        <div className="section-head" style={{ marginBottom: 12, padding: 0 }}>
+          <span className="section-title">Heutige Quests</span>
+          <span className="pill pill-xp" style={{ fontSize: 12 }}>{completed} / {total}</span>
         </div>
 
         {goals.length === 0 ? (
           <div className="empty-hint">
             <span className="hint-emoji">🎯</span>
-            Noch keine Ziele angelegt.<br />
-            Geh zu <strong>Ziele</strong> und füge welche hinzu!
+            Noch keine Quests angelegt.<br />
+            Geh zu <strong>Quests</strong> und füge welche hinzu!
           </div>
         ) : (
           <div className="goal-list">
@@ -88,16 +61,14 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
                   key={goal.id}
                   className={`goal-card ${done ? 'done' : ''}`}
                   onClick={() => handleToggle(goal.id)}
-                  style={{ transform: isAnimating ? 'scale(0.98)' : 'scale(1)', transition: 'transform 0.2s' }}
+                  style={{ transform: isAnimating ? 'scale(0.98)' : 'scale(1)' }}
                 >
                   <span className="goal-emoji">{goal.icon}</span>
                   <div className="goal-info">
                     <span className="goal-name">{goal.name}</span>
                     <span className="goal-xp-badge">+{goal.xp} XP</span>
                   </div>
-                  <div className="check-circle">
-                    {done ? '✓' : ''}
-                  </div>
+                  <div className="check-circle">{done ? '✓' : ''}</div>
                 </button>
               )
             })}
@@ -105,7 +76,6 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
         )}
       </div>
 
-      {/* Progress bar */}
       {total > 0 && (
         <div className="daily-progress-wrap">
           <div className="progress-bar-bg">
@@ -113,7 +83,7 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
           </div>
           <div className="progress-label">
             <span>{Math.round(pct * 100)}% geschafft</span>
-            <span style={{ color: 'var(--primary)' }}>
+            <span style={{ color: 'var(--gold)' }}>
               +{todayCompleted.reduce((s, id) => {
                 const g = goals.find(x => x.id === id)
                 return s + (g ? g.xp : 0)
@@ -123,12 +93,11 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
         </div>
       )}
 
-      {/* All done celebration */}
       {allDone && (
         <div className="all-done-banner" style={{ marginTop: 20 }}>
-          <div className="all-done-emoji">🎉</div>
-          <div className="all-done-title">Alle Ziele erledigt!</div>
-          <div className="all-done-sub">Streak läuft weiter. Du bist unaufhaltbar.</div>
+          <div className="all-done-emoji">🏴‍☠️</div>
+          <div className="all-done-title">Alle Quests erledigt!</div>
+          <div className="all-done-sub">Plus Ultra, {profile.name}! Der Streak lebt weiter.</div>
         </div>
       )}
 

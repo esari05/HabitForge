@@ -1,7 +1,8 @@
 const TABS = [
-  { id: 'today',    icon: '☀️',  label: 'Heute'       },
-  { id: 'progress', icon: '⚡',  label: 'Fortschritt' },
-  { id: 'goals',    icon: '🎯',  label: 'Ziele'       },
+  { id: 'today',    icon: '⚔️', label: 'Heute'   },
+  { id: 'progress', icon: '⚡', label: 'Level'   },
+  { id: 'goals',    icon: '🎯', label: 'Quests'  },
+  { id: 'profile',  icon: '👤', label: 'Profil'  },
 ]
 
 export default function BottomNav({ current, onChange }) {
