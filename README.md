@@ -84,3 +84,62 @@ Default goals (edit or delete as you like):
 - 🏋️ Gym Training — 35 XP
 - 🏃 3km Laufen — 25 XP
 - 💧 2L Wasser — 10 XP
+
+---
+
+## 🔔 Push-Server Setup (einmalig, ~10 Minuten)
+
+Damit du **echte tägliche Push-Erinnerungen** bekommst (auch wenn die App geschlossen ist):
+
+### Schritt 1: VAPID Keys generieren
+
+Im Projektordner auf deinem PC:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+Du bekommst einen **Public Key** und einen **Private Key** — kopier dir beide.
+
+### Schritt 2: Environment Variables in Vercel setzen
+
+Vercel Dashboard → dein Projekt → **Settings** → **Environment Variables**:
+
+| Name | Wert |
+|---|---|
+| `VAPID_PUBLIC_KEY` | dein Public Key |
+| `VAPID_PRIVATE_KEY` | dein Private Key |
+| `VAPID_SUBJECT` | `mailto:deine@email.com` (irgendeine deiner E-Mails) |
+
+### Schritt 3: Upstash Redis verbinden (kostenloser Speicher)
+
+1. Vercel Dashboard → dein Projekt → Tab **Storage**
+2. **Upstash Redis** auswählen → **Create** (Free Plan)
+3. Mit deinem Projekt verbinden — die Env-Variablen werden automatisch gesetzt
+
+### Schritt 4: Neuen Code deployen
+
+Aktualisierte Dateien ins GitHub-Repo hochladen → Vercel deployt automatisch.
+
+### Schritt 5: Auf dem iPhone aktivieren
+
+1. App vom **Home-Bildschirm** öffnen (nicht Safari!)
+2. **Profil** → Toggle "Tägliche Push-Erinnerung" → erlauben
+3. Fertig! 🎉
+
+### Testen
+
+Öffne `https://deine-app.vercel.app/api/send-reminder?force=1` im Browser —
+du solltest sofort eine Test-Push aufs iPhone bekommen.
+
+### ⏰ Wichtig: Erinnerungszeit
+
+Vercel's kostenloser Cron läuft **1x täglich** zur Zeit in `vercel.json`
+(aktuell `0 6 * * *` = 6:00 UTC = **8:00 Wien** im Sommer). Wenn du eine andere
+Uhrzeit willst, passe BEIDES an: die Zeit in der App UND den Cron in `vercel.json`
+(UTC! Wien = UTC+2 im Sommer, UTC+1 im Winter).
+
+**Alternative für minutengenaue Erinnerungen:** Registriere dich kostenlos auf
+[cron-job.org](https://cron-job.org) und lass `https://deine-app.vercel.app/api/send-reminder`
+alle 30 Minuten aufrufen — dann gilt automatisch die Zeit aus der App, und es wird
+trotzdem nur 1x pro Tag gesendet.

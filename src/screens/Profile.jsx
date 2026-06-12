@@ -1,22 +1,38 @@
 import { useState } from 'react'
+import { pushSupported, subscribeToPush, updatePushTime, unsubscribeFromPush } from '../utils/push.js'
 
 export default function Profile({ profile, updateProfile, settings, updateSettings, levelInfo, resetAll }) {
   const [confirmReset, setConfirmReset] = useState(false)
-  const notifSupported = 'Notification' in window
+  const [busy, setBusy] = useState(false)
+  const [pushMsg, setPushMsg] = useState(null)
+
+  const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone
 
   const handleNotifToggle = async () => {
-    if (settings.notifications) {
-      updateSettings({ ...settings, notifications: false })
-      return
+    if (busy) return
+    setBusy(true)
+    setPushMsg(null)
+    try {
+      if (settings.notifications) {
+        await unsubscribeFromPush()
+        updateSettings({ ...settings, notifications: false })
+        setPushMsg({ ok: true, text: 'Erinnerungen deaktiviert.' })
+      } else {
+        await subscribeToPush(settings.reminderTime)
+        updateSettings({ ...settings, notifications: true })
+        setPushMsg({ ok: true, text: `Aktiviert! Tägliche Erinnerung um ca. ${settings.reminderTime} Uhr. 🔥` })
+      }
+    } catch (err) {
+      setPushMsg({ ok: false, text: err.message })
     }
-    if (!notifSupported) return
-    const perm = await Notification.requestPermission()
-    if (perm === 'granted') {
-      updateSettings({ ...settings, notifications: true })
-      new Notification('HabitForge ⚔️', {
-        body: `Erinnerungen aktiv, ${profile.name}! Wir sehen uns um ${settings.reminderTime}.`,
-        icon: '/icon-192.png',
-      })
+    setBusy(false)
+  }
+
+  const handleTimeChange = async (e) => {
+    const time = e.target.value
+    updateSettings({ ...settings, reminderTime: time })
+    if (settings.notifications) {
+      try { await updatePushTime(time) } catch {}
     }
   }
 
@@ -75,10 +91,10 @@ export default function Profile({ profile, updateProfile, settings, updateSettin
 
         <div className="profile-row">
           <div>
-            <span className="profile-row-label" style={{ display: 'block' }}>Tägliche Erinnerung</span>
-            {!notifSupported && (
+            <span className="profile-row-label" style={{ display: 'block' }}>Tägliche Push-Erinnerung</span>
+            {!pushSupported() && (
               <span style={{ fontSize: 11, color: 'var(--danger)' }}>
-                Browser unterstützt keine Benachrichtigungen
+                Auf diesem Gerät nicht verfügbar
               </span>
             )}
           </div>
@@ -86,7 +102,8 @@ export default function Profile({ profile, updateProfile, settings, updateSettin
             className={`toggle ${settings.notifications ? 'on' : ''}`}
             onClick={handleNotifToggle}
             aria-label="Benachrichtigungen umschalten"
-            disabled={!notifSupported}
+            disabled={!pushSupported() || busy}
+            style={{ opacity: busy ? 0.5 : 1 }}
           />
         </div>
 
@@ -97,14 +114,26 @@ export default function Profile({ profile, updateProfile, settings, updateSettin
             className="profile-input"
             style={{ width: 110 }}
             value={settings.reminderTime}
-            onChange={e => updateSettings({ ...settings, reminderTime: e.target.value })}
+            onChange={handleTimeChange}
           />
         </div>
 
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, padding: '4px 4px 0' }}>
-          💡 Tipp: Auf dem iPhone müssen Benachrichtigungen über die installierte
-          Home-Bildschirm-App aktiviert werden (iOS 16.4+), nicht über Safari direkt.
-        </p>
+        {pushMsg && (
+          <p style={{
+            fontSize: 13, lineHeight: 1.5, padding: '10px 14px', borderRadius: 10,
+            background: pushMsg.ok ? 'var(--success-dim)' : 'rgba(255,92,122,0.12)',
+            color: pushMsg.ok ? 'var(--success)' : 'var(--danger)',
+          }}>
+            {pushMsg.text}
+          </p>
+        )}
+
+        {!isStandalone && (
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, padding: '4px 4px 0' }}>
+            💡 Auf dem iPhone funktionieren Push-Erinnerungen nur, wenn die App über
+            „Zum Home-Bildschirm" installiert wurde und du sie von dort öffnest (iOS 16.4+).
+          </p>
+        )}
 
         <div className="section-head" style={{ padding: 0, margin: '18px 0 2px' }}>
           <span className="section-title">Danger Zone</span>

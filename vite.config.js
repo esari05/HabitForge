@@ -51,7 +51,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'] },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        importScripts: ['push-sw.js']
+      },
       manifest: {
         name: 'HabitForge',
         short_name: 'HabitForge',

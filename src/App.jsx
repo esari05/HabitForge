@@ -26,28 +26,6 @@ export default function App() {
   useEffect(() => saveHistory(history), [history])
   useEffect(() => saveSettings(settings), [settings])
 
-  // In-app reminder: while the app is open, fire a notification at reminder time
-  useEffect(() => {
-    if (!settings.notifications || !('Notification' in window)) return
-    if (Notification.permission !== 'granted') return
-
-    const check = () => {
-      const now = new Date()
-      const [h, m] = settings.reminderTime.split(':').map(Number)
-      const fired = localStorage.getItem('hf_notif_fired')
-      const today = getTodayKey()
-      if (now.getHours() === h && now.getMinutes() === m && fired !== today) {
-        localStorage.setItem('hf_notif_fired', today)
-        new Notification('HabitForge ⚔️', {
-          body: 'Zeit für deine Quests! Dein Streak wartet. 🔥',
-          icon: '/icon-192.png',
-        })
-      }
-    }
-    const interval = setInterval(check, 30000)
-    return () => clearInterval(interval)
-  }, [settings])
-
   const today = getTodayKey()
   const todayCompleted = history[today] || []
   const totalXP = calculateTotalXP(history, goals)
