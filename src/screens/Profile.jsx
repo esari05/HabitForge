@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { pushSupported, subscribeToPush, updatePushTime, unsubscribeFromPush } from '../utils/push.js'
 
-export default function Profile({ profile, updateProfile, settings, updateSettings, levelInfo, resetAll }) {
+export default function Profile({ profile, updateProfile, settings, updateSettings, levelInfo, resetAll, syncCode }) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [busy, setBusy] = useState(false)
   const [pushMsg, setPushMsg] = useState(null)
@@ -134,6 +134,18 @@ export default function Profile({ profile, updateProfile, settings, updateSettin
             „Zum Home-Bildschirm" installiert wurde und du sie von dort öffnest (iOS 16.4+).
           </p>
         )}
+
+        <div className="section-head" style={{ padding: 0, margin: '18px 0 2px' }}>
+          <span className="section-title">Cloud-Backup</span>
+        </div>
+
+        <div className="sync-code">{syncCode || '—'}</div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, padding: '0 4px' }}>
+          ☁️ Dein Spielstand wird automatisch mit diesem Code in der Cloud gespeichert —
+          bei jedem Update und auf jedem Gerät bleibt alles erhalten.
+          <strong style={{ color: 'var(--gold)' }}> Schreib dir den Code auf!</strong> Mit
+          ihm kannst du deinen Helden auf jedem Gerät wiederherstellen.
+        </p>
 
         <div className="section-head" style={{ padding: 0, margin: '18px 0 2px' }}>
           <span className="section-title">Danger Zone</span>

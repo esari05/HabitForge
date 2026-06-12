@@ -111,3 +111,19 @@ export const totalCompletionsEver = (history) =>
 
 export const totalActiveDays = (history) =>
   Object.values(history).filter(arr => arr.length > 0).length
+
+// ─── Per-Goal Streak ───────────────────────────────────────────
+export const goalStreak = (history, goalId) => {
+  const today = getTodayKey()
+  const todayDone = (history[today] || []).includes(goalId)
+  const start = new Date()
+  if (!todayDone) start.setDate(start.getDate() - 1)
+
+  let streak = 0
+  for (let i = 0; i < 999; i++) {
+    const d = new Date(start); d.setDate(d.getDate() - i)
+    if (!(history[dateToKey(d)] || []).includes(goalId)) break
+    streak++
+  }
+  return streak
+}

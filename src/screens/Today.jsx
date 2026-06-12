@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { quotes } from '../data/quotes.js'
-import { getDailyQuote, formatDate, calculateStreak } from '../utils/helpers.js'
+import { getDailyQuote, formatDate, calculateStreak, goalStreak } from '../utils/helpers.js'
 
 export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, history, profile }) {
   const [justChecked, setJustChecked] = useState(null)
@@ -56,6 +56,7 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
             {goals.map(goal => {
               const done = todayCompleted.includes(goal.id)
               const isAnimating = justChecked === goal.id
+              const gStreak = goalStreak(history, goal.id)
               return (
                 <button
                   key={goal.id}
@@ -66,7 +67,10 @@ export default function Today({ goals, todayCompleted, toggleGoal, levelInfo, hi
                   <span className="goal-emoji">{goal.icon}</span>
                   <div className="goal-info">
                     <span className="goal-name">{goal.name}</span>
-                    <span className="goal-xp-badge">+{goal.xp} XP</span>
+                    <span className="goal-xp-badge">
+                      +{goal.xp} XP
+                      {gStreak >= 2 && <span style={{ color: 'var(--fire)', marginLeft: 8 }}>🔥{gStreak}</span>}
+                    </span>
                   </div>
                   <div className="check-circle">{done ? '✓' : ''}</div>
                 </button>
